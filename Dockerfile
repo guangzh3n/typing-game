@@ -8,7 +8,8 @@ WORKDIR /app/client
 COPY client/package*.json ./
 
 # 安装前端依赖（包括 devDependencies，因为构建需要）
-RUN npm ci
+# 如果 package-lock.json 存在则使用 npm ci，否则使用 npm install
+RUN if [ -f package-lock.json ]; then npm ci; else npm install; fi
 
 # 复制前端源代码
 COPY client/ ./
@@ -25,7 +26,8 @@ WORKDIR /app
 COPY package*.json ./
 
 # 安装后端依赖
-RUN npm ci --only=production
+# 如果 package-lock.json 存在则使用 npm ci，否则使用 npm install
+RUN if [ -f package-lock.json ]; then npm ci --only=production; else npm install --only=production; fi
 
 # 复制后端源代码
 COPY server/ ./server/
