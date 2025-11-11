@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
+const { wordData, getWordWithEmoji } = require('./wordData');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -10,38 +11,25 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
-// 简单的单词库 - 适合儿童
-const wordLists = {
-  easy: [
-    'cat', 'dog', 'sun', 'moon', 'star', 'tree', 'bird', 'fish', 'book', 'ball',
-    'car', 'bus', 'hat', 'cup', 'pen', 'red', 'blue', 'green', 'big', 'small',
-    'happy', 'sad', 'run', 'jump', 'play', 'sing', 'dance', 'read', 'write', 'draw'
-  ],
-  medium: [
-    'apple', 'banana', 'orange', 'grape', 'water', 'house', 'school', 'friend', 'family',
-    'mother', 'father', 'sister', 'brother', 'happy', 'smile', 'laugh', 'music', 'piano',
-    'guitar', 'dance', 'sport', 'soccer', 'basketball', 'swimming', 'reading', 'writing',
-    'drawing', 'painting', 'cooking', 'eating', 'sleeping', 'waking', 'morning', 'evening'
-  ],
-  hard: [
-    'beautiful', 'wonderful', 'amazing', 'fantastic', 'adventure', 'journey', 'explore',
-    'discover', 'imagine', 'creative', 'curious', 'excited', 'delicious', 'comfortable',
-    'butterfly', 'elephant', 'dinosaur', 'rainbow', 'sunshine', 'mountain', 'ocean',
-    'forest', 'garden', 'library', 'hospital', 'restaurant', 'airport', 'station'
-  ]
-};
-
 // API Routes
 app.get('/api/words', (req, res) => {
   const level = req.query.level || 'easy';
   const count = parseInt(req.query.count) || 10;
   
-  const words = wordLists[level] || wordLists.easy;
+  const words = wordData[level] || wordData.easy;
   const selectedWords = [];
+  const usedIndices = new Set();
   
-  for (let i = 0; i < count; i++) {
+  // 随机选择单词，确保不重复
+  while (selectedWords.length < count && selectedWords.length < words.length) {
     const randomIndex = Math.floor(Math.random() * words.length);
-    selectedWords.push(words[randomIndex]);
+    if (!usedIndices.has(randomIndex)) {
+      usedIndices.add(randomIndex);
+      selectedWords.push({
+        word: words[randomIndex].word,
+        emoji: words[randomIndex].emoji
+      });
+    }
   }
   
   res.json({ words: selectedWords, level });
