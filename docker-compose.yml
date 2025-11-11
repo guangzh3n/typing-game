@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  typing-game:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: kids-typing-game
+    restart: unless-stopped
+    ports:
+      - "3001:3001"  # 格式: "主机端口:容器端口"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+    # 如果需要持久化数据，可以添加 volumes
+    # volumes:
+    #   - /home/edward/Documents/piano-game/data:/app/data
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3001/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
